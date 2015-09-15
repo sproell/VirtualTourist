@@ -7,14 +7,22 @@
 //
 
 import CoreData
+import MapKit
 
 @objc(Pin)
 
-class Pin : NSManagedObject {
+class Pin : NSManagedObject, MKAnnotation {
     
     @NSManaged var latitude: Double
     @NSManaged var longitude: Double
+    @NSManaged var photos: [Photo]
     
+    var coordinate : CLLocationCoordinate2D {
+        get {
+            return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        }
+    }
+
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }

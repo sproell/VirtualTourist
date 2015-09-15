@@ -13,8 +13,6 @@ import CoreData
 class MapViewController: UIViewController, MKMapViewDelegate {
 
     @IBOutlet weak var mapView: MKMapView!
-    
-    var pins: [Pin]!
     let infoLabelHeight: CGFloat = 60
     
     override func viewDidLoad() {
@@ -26,10 +24,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         mapView.addGestureRecognizer(lpgr)
         
         self.navigationItem.rightBarButtonItem = self.editButtonItem()
-        
+        self.navigationItem.backBarButtonItem = UIBarButtonItem(title: "Ok", style: UIBarButtonItemStyle.Plain, target: nil, action: nil)
         createInfoLabel()
         
-        pins = fetchAllPins()
         addPinsToMap()
     }
     
@@ -75,57 +72,59 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func addPinsToMap() {
+        let pins = fetchAllPins()
+        
         for pin in pins {
-            println("adding a pin")
-            addPinToMap(CLLocationCoordinate2D(latitude: pin.latitude, longitude: pin.longitude))
+            println("adding a pin from storage")
+            addPinToMap(pin)
         }
     }
 
     func longTapMap(sender: UIGestureRecognizer) {
         println("long tap:")
-     
+        
         // Only add pins when we begin the log tap
         if sender.state != UIGestureRecognizerState.Began { return }
         let touchLocation = sender.locationInView(mapView)
         let locationCoordinate = mapView.convertPoint(touchLocation, toCoordinateFromView: mapView)
-        addPinToMap(locationCoordinate)
+        println("Tapped at lat: \(locationCoordinate.latitude) long: \(locationCoordinate.longitude)")
         
-        pins.append(Pin(lat: locationCoordinate.latitude, long: locationCoordinate.longitude, context: sharedContext))
+        println("adding a new pin")
+        addPinToMap(Pin(lat: locationCoordinate.latitude, long: locationCoordinate.longitude, context: sharedContext))
         
         CoreDataStackManager.sharedInstance().saveContext()
-        
-        println("Tapped at lat: \(locationCoordinate.latitude) long: \(locationCoordinate.longitude)")
     }
     
-    func addPinToMap(coordinate: CLLocationCoordinate2D) {
-        var annotation = MKPointAnnotation()
-        annotation.coordinate = coordinate
-        println("adding: \(coordinate.latitude) long: \(coordinate.longitude)")
-
-        
+    func addPinToMap(pin: Pin) {
         dispatch_async(dispatch_get_main_queue(), {
-            self.mapView.addAnnotation(annotation)
+            self.mapView.addAnnotation(pin)
         })
     }
     
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
         println("tapped pin")
         
-        // TODO: how to find pin in array?
+        // get annotation from view
+        let pin = view.annotation as! Pin
         
         if editing {
-            // remove pin
             
-            // remove from array
+            println("removing pin")
+            
+            // remove pin from map
+            self.mapView.removeAnnotation(pin)
             
             // remove from context
-            // sharedContext.deleteObject()
+            sharedContext.deleteObject(pin)
             CoreDataStackManager.sharedInstance().saveContext()
             
         } else {
+
             // segue to photo view controller
+            let controller = storyboard!.instantiateViewControllerWithIdentifier("PhotoViewController") as! PhotoViewController
+            controller.pin = pin
             
-            // set pin on view controller
+            self.navigationController!.pushViewController(controller, animated: true)
         }
     }
     
@@ -139,15 +138,4 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             UIView.animateWithDuration(0.3, animations: { self.view.frame.origin.y += self.infoLabelHeight }, completion: nil)
         }
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }
