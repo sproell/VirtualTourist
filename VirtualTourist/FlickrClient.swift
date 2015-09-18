@@ -41,14 +41,12 @@ class FlickrClient: NSObject {
         // Specify method and parameters
         let urlString = BASE_URL + escapedParameters(methodArguments)
         let url = NSURL(string: urlString)!
-        println(urlString)
         
         // Create a request and add the authentication keys as headers
         let request = NSURLRequest(URL: url)
         
         let task = session.dataTaskWithRequest(request) {data, response, downloadError in
             if let error = downloadError {
-                println(error.description)
                 completionHandler(result: nil, error: error)
             } else {
                 var parsingError: NSError? = nil
@@ -80,7 +78,6 @@ class FlickrClient: NSObject {
     }
     
     func taskForImage(filePath: String, completionHandler: (imageData: NSData?, error: NSError?) ->  Void) -> NSURLSessionTask {
-        println("loading image: \(filePath)")
         
         let url = NSURL(string: filePath)
 

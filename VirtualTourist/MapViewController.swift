@@ -42,7 +42,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         var label = UILabel(frame: infoLabelFrame)
         label.textColor = UIColor.whiteColor()
         label.backgroundColor = UIColor.redColor()
-        label.font = UIFont(name: "Verdana", size: 12)
+        label.font = UIFont(name: "Arial", size: 14)
         label.textAlignment = NSTextAlignment.Center
         label.text = "Tap Pins to Delete"
 
@@ -64,7 +64,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         // Check for Errors
         if let error = error {
-            println("Error in fetchAllPins(): \(error)")
+            alertViewForError(error)
         }
         
         // Return the results, cast to an array of Pin objects
@@ -75,21 +75,17 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         let pins = fetchAllPins()
         
         for pin in pins {
-            println("adding a pin from storage")
             addPinToMap(pin)
         }
     }
 
     func longTapMap(sender: UIGestureRecognizer) {
-        println("long tap:")
         
         // Only add pins when we begin the log tap
         if sender.state != UIGestureRecognizerState.Began { return }
         let touchLocation = sender.locationInView(mapView)
         let locationCoordinate = mapView.convertPoint(touchLocation, toCoordinateFromView: mapView)
-        println("Tapped at lat: \(locationCoordinate.latitude) long: \(locationCoordinate.longitude)")
-        
-        println("adding a new pin")
+
         addPinToMap(Pin(lat: locationCoordinate.latitude, long: locationCoordinate.longitude, context: sharedContext))
         
         CoreDataStackManager.sharedInstance().saveContext()
@@ -101,15 +97,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         })
     }
     
+    // User taps a pin - either remove it because we're editing or segue to the photo view
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
-        println("tapped pin")
         
         // get annotation from view
         let pin = view.annotation as! Pin
         
         if editing {
-            
-            println("removing pin")
             
             // remove pin from map
             self.mapView.removeAnnotation(pin)
@@ -128,14 +122,20 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
+    // User tapped Edit button.  If we're editing, slide up info label telling user he is in pin delete mode.
     override func setEditing(editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
-        println("editing: \(editing)")
         
         if editing {
             UIView.animateWithDuration(0.3, animations: { self.view.frame.origin.y -= self.infoLabelHeight }, completion: nil)
         } else {
             UIView.animateWithDuration(0.3, animations: { self.view.frame.origin.y += self.infoLabelHeight }, completion: nil)
         }
+    }
+    
+    func alertViewForError(error: NSError) {
+        let alertController = UIAlertController(title: "Error Occurred", message: error.localizedDescription, preferredStyle: UIAlertControllerStyle.Alert)
+        alertController.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default,handler: nil))
+        self.presentViewController(alertController, animated: true, completion: nil)
     }
 }

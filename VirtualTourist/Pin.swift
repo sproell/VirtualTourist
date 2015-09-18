@@ -17,6 +17,7 @@ class Pin : NSManagedObject, MKAnnotation {
     @NSManaged var longitude: Double
     @NSManaged var photos: [Photo]
     
+    // This property allows our Pin class to be added as a map annotation
     var coordinate : CLLocationCoordinate2D {
         get {
             return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)

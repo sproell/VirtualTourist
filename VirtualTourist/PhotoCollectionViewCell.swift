@@ -8,7 +8,8 @@
 
 import UIKit
 
-class PhotoCollectionViewCell: UICollectionViewCell {
+class PhotoCollectionViewCell: TaskCancelingCollectionViewCell {
     
     @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!   
 }

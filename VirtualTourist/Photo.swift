@@ -47,14 +47,7 @@ class Photo : NSManagedObject {
             FlickrClient.Caches.imageCache.storeImage(newValue, withIdentifier: fileName()!)
         }
     }
-    
-    var cacheIdentifer: String {
-        get {
-            let url = NSURL(string: imagePath!)!
-            return (url.path! as NSString).substringFromIndex(1)
-        }
-    }
-    
+
     func fileName() -> String? {
         let url = NSURL(fileURLWithPath: imagePath!)
         return url?.lastPathComponent

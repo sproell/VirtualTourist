@@ -24,17 +24,13 @@ class ImageCache {
         let path = pathForIdentifier(identifier!)
         var data: NSData?
         
-        println("retrieving: \(path)")
-        
         // First try the memory cache
         if let image = inMemoryCache.objectForKey(path) as? UIImage {
-            println("found in memory")
             return image
         }
         
         // Next Try the hard drive
         if let data = NSData(contentsOfFile: path) {
-            println("found on disk")
             return UIImage(data: data)
         }
         
@@ -45,8 +41,6 @@ class ImageCache {
     
     func storeImage(image: UIImage?, withIdentifier identifier: String) {
         let path = pathForIdentifier(identifier)
-        
-        println("storing: \(path)")
         
         // If the image is nil, remove images from the cache
         if image == nil {
@@ -68,8 +62,6 @@ class ImageCache {
     func pathForIdentifier(identifier: String) -> String {
         let documentsDirectoryURL: NSURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first as! NSURL
         let fullURL = documentsDirectoryURL.URLByAppendingPathComponent(identifier)
-        
-        //println(fullURL.path!)
         return fullURL.path!
     }
 }
