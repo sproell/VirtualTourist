@@ -52,4 +52,11 @@ class Photo : NSManagedObject {
         let url = NSURL(fileURLWithPath: imagePath!)
         return url?.lastPathComponent
     }
+    
+    // Called when a managed object is deleted.  This insures the 
+    // associated image is deleted from the persistent storage.
+    override func prepareForDeletion() {
+        super.prepareForDeletion()
+        image = nil
+    }
 }
